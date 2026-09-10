@@ -3,8 +3,7 @@ from groq import Groq
 from fpdf import FPDF
 
 # Groq client init
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-
+client = Groq(api_key="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")
 def generate_content():
     prompt = """
     Create an actionable and valuable developer cheatsheet titled 'Ultimate AI Tools & Developer Hacks 2026'.
