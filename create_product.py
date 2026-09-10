@@ -1,50 +1,46 @@
-import os
-from groq import Groq
 from fpdf import FPDF
 
-# Groq client init
-client = Groq(api_key="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")
+CONTENT = """
+ULTIMATE AI & DEVELOPER POWER PACK 2026
 
-def generate_content():
-    prompt = """
-    Create a highly valuable, well-structured cheat sheet titled 'Ultimate AI & Developer Power Pack 2026'.
-    Include:
-    1. Top 5 Free AI Tools for Coding & Automation
-    2. 5 High-Impact System Prompts for Developers
-    3. Essential Terminal Shortcuts & Hacks
-    Keep it clean, concise, and professional with bullet points. Do not include markdown stars (**) in headings so it renders cleanly.
-    """
-    completion = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.6,
-        max_tokens=1500
-    )
-    return completion.choices[0].message.content
+1. TOP 5 FREE AI TOOLS FOR DEVELOPERS
+- Cursor / Windsurf: AI-native code editors for full-stack workflows.
+- Groq Cloud: Ultra low-latency inference for local and cloud bots.
+- v0.dev: Generate production-ready frontend components from prompts.
+- n8n (Self-hosted): Enterprise-grade workflow automation without limits.
+- Hugging Face Spaces: Free cloud hosting for small AI prototypes.
+
+2. HIGH-IMPACT DEVELOPER PROMPTS
+- Architecture Design: "Analyze this system architecture for high-concurrency bottlenecks and propose 3 caching strategies."
+- Code Optimization: "Refactor this Python code to reduce memory footprint and improve execution speed with complexity O(n)."
+- Regex Generator: "Generate an optimized regex to validate international phone numbers and match standard formats."
+
+3. ESSENTIAL TERMINAL SHORTCUTS & HACKS
+- Ctrl + R: Reverse-search your entire shell command history.
+- lsof -i :<port>: Find and terminate the process hogging your local port.
+- curl -I <url>: Instantly fetch and inspect HTTP response headers.
+- tail -f <log_file>: Stream application logs in real-time.
+"""
 
 def create_pdf(text_content):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
     
-    # Title
-    pdf.set_font("Helvetica", "B", 18)
-    pdf.set_text_color(30, 30, 30)
-    pdf.cell(0, 15, "Ultimate AI & Developer Power Pack", ln=True, align="C")
+    # Header
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_text_color(20, 20, 20)
+    pdf.cell(0, 15, "TechDrop24 - Exclusive Developer Pack", ln=True, align="C")
     pdf.ln(5)
     
-    # Body
-    pdf.set_font("Helvetica", size=11)
-    pdf.set_text_color(50, 50, 50)
-    
-    # Clean up non-latin characters if any
+    # Content
+    pdf.set_font("Helvetica", size=10)
+    pdf.set_text_color(40, 40, 40)
     safe_text = text_content.encode('latin-1', 'replace').decode('latin-1')
-    pdf.multi_cell(0, 8, safe_text)
+    pdf.multi_cell(0, 7, safe_text)
     
     pdf.output("digital_product.pdf")
     print("PDF Successfully Generated: digital_product.pdf")
 
 if __name__ == "__main__":
-    print("Generating product content via Groq...")
-    content = generate_content()
-    create_pdf(content)
+    create_pdf(CONTENT)
