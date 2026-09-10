@@ -1,3 +1,5 @@
 groq
 fpdf2
 requests
+moviepy
+edge-tts
