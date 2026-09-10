@@ -1,41 +1,49 @@
+import os
+from groq import Groq
 from fpdf import FPDF
 
-CONTENT = """
-ULTIMATE AI & DEVELOPER POWER PACK 2026
+# Groq client init
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-1. TOP 5 FREE AI TOOLS FOR DEVELOPERS
-- Cursor / Windsurf: AI-native code editors for full-stack workflows.
-- Groq Cloud: Ultra low-latency inference for local and cloud bots.
-- v0.dev: Generate production-ready frontend components from prompts.
-- n8n (Self-hosted): Enterprise-grade workflow automation without limits.
-- Hugging Face Spaces: Free cloud hosting for small AI prototypes.
-
-2. HIGH-IMPACT DEVELOPER PROMPTS
-- Architecture Design: "Analyze this system architecture for high-concurrency bottlenecks and propose 3 caching strategies."
-- Code Optimization: "Refactor this Python code to reduce memory footprint and improve execution speed with complexity O(n)."
-- Regex Generator: "Generate an optimized regex to validate international phone numbers and match standard formats."
-
-3. ESSENTIAL TERMINAL SHORTCUTS & HACKS
-- Ctrl + R: Reverse-search your entire shell command history.
-- lsof -i :<port>: Find and terminate the process hogging your local port.
-- curl -I <url>: Instantly fetch and inspect HTTP response headers.
-- tail -f <log_file>: Stream application logs in real-time.
-"""
+def generate_content():
+    prompt = """
+    Create an actionable and valuable developer cheatsheet titled 'Ultimate AI Tools & Developer Hacks 2026'.
+    Include:
+    1. Top 5 AI Tools Every Developer Should Know in 2026
+    2. 5 High-Impact System Prompts for Coding, Debugging, and System Architecture
+    3. Essential Terminal Hacks and Automation Tips
+    Keep it clean, concise, practical, and well-structured with bullet points. Avoid using markdown formatting symbols like asterisks (*) or hash signs (#) so it prints cleanly.
+    """
+    
+    completion = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.6,
+        max_tokens=1500
+    )
+    return completion.choices[0].message.content
 
 def create_pdf(text_content):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
     
-    # Header
+    # Title Header
     pdf.set_font("Helvetica", "B", 16)
     pdf.set_text_color(20, 20, 20)
-    pdf.cell(0, 15, "TechDrop24 - Exclusive Developer Pack", ln=True, align="C")
-    pdf.ln(5)
+    pdf.cell(0, 12, "TechDrop24 - Exclusive Developer Power Pack", ln=True, align="C")
+    pdf.ln(4)
     
-    # Content
+    pdf.set_font("Helvetica", size=9)
+    pdf.set_text_color(100, 100, 100)
+    pdf.cell(0, 8, "Daily Automated AI & Developer Cheatsheet", ln=True, align="C")
+    pdf.ln(6)
+    
+    # Content Body
     pdf.set_font("Helvetica", size=10)
     pdf.set_text_color(40, 40, 40)
+    
+    # Clean non-latin characters
     safe_text = text_content.encode('latin-1', 'replace').decode('latin-1')
     pdf.multi_cell(0, 7, safe_text)
     
@@ -43,4 +51,6 @@ def create_pdf(text_content):
     print("PDF Successfully Generated: digital_product.pdf")
 
 if __name__ == "__main__":
-    create_pdf(CONTENT)
+    print("Generating product content via Groq (openai/gpt-oss-20b)...")
+    content = generate_content()
+    create_pdf(content)
