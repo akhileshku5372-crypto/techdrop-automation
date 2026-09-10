@@ -47,7 +47,7 @@ def generate_post_groq(tool_name, tool_desc, tool_link):
     )
     
     body = {
-        "model": "llama-3.3-70b-versatile",
+        "model": "llama-3.1-8b-instant",",
         "messages": [
             {"role": "system", "content": "You write crisp, high-value tech updates for Telegram channels. No intro fluff, no closing remarks."},
             {"role": "user", "content": prompt}
