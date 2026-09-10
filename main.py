@@ -3,10 +3,10 @@ import urllib.parse
 import json
 import random
 
-BOT_TOKEN = "8955674704:AAFEP21NawmtKsbT4G3sZD0Pr1vzfZk7S96g"
+BOT_TOKEN = "8955674704:AAGfa0olCPtJP4y1UXUw6TsZH7jLm-2TacQ"
 MY_CHAT_ID = "7007988430"
 CHANNEL_ID = "@techdrop24_daily"
-GEMINI_API_KEY = "AQ.Ab8RN6K7GWGM-1iRIOjea0a8-iHnWd2-hqbWk4m9JU6WaKRoJA"
+GROQ_API_KEY = "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"
 
 def send_telegram(chat_target, message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -26,45 +26,61 @@ def send_telegram(chat_target, message):
         print(f"Unexpected error: {e}")
         return False
 
-def generate_post(topic_data):
-    for model_name in ["gemini-1.5-flash", "gemini-2.0-flash"]:
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
-            headers = {"Content-Type": "application/json"}
-            prompt = (
-                f"Write a crisp 3-line Telegram post about this tool: {topic_data}.\n"
-                "Line 1: Tool name with an emoji.\n"
-                "Line 2: What it solves.\n"
-                "Line 3: Official Link.\n"
-                "Keep it short, clean, no boilerplate intros."
-            )
-            body = {"contents": [{"parts": [{"text": prompt}]}]}
-            req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers)
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                res = json.loads(resp.read().decode("utf-8"))
-                return res["candidates"][0]["content"]["parts"][0]["text"]
-        except Exception as err:
-            print(f"Gemini API attempt failed: {err}")
-            continue
-    return None
+def generate_post_groq(tool_name, tool_desc, tool_link):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+    
+    prompt = (
+        f"Create a short, engaging 3-line Telegram post about this tech tool:\n"
+        f"Name: {tool_name}\n"
+        f"Description: {tool_desc}\n"
+        f"Link: {tool_link}\n\n"
+        "Format strictly:\n"
+        "🔥 [Tool Name]\n\n"
+        "💡 What it does: (1 line summary)\n\n"
+        "🎯 Why use it: (1 clear benefit for developers/students)\n\n"
+        f"🔗 Link: {tool_link}"
+    )
+    
+    body = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": "You write crisp, high-value tech updates for Telegram channels. No intro fluff, no closing remarks."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.5
+    }
+    
+    try:
+        req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers)
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            res = json.loads(resp.read().decode("utf-8"))
+            return res["choices"][0]["message"]["content"]
+    except Exception as e:
+        print(f"Groq API Error: {e}")
+        return None
 
 tools = [
-    {"name": "FastAPI", "desc": "Ultra-fast modern Python framework for building production APIs.", "link": "https://fastapi.tiangolo.com/"},
-    {"name": "v0 by Vercel", "desc": "AI system to generate modern frontend web components.", "link": "https://v0.dev/"},
-    {"name": "Open-WebUI", "desc": "Offline self-hosted UI for running local AI models.", "link": "https://openwebui.com/"},
-    {"name": "Ollama", "desc": "Run open source LLMs locally with simple commands.", "link": "https://ollama.com/"}
+    {"name": "FastAPI", "desc": "High performance, easy to learn web framework for APIs in Python.", "link": "https://fastapi.tiangolo.com/"},
+    {"name": "v0 by Vercel", "desc": "Generative UI system that builds modern frontend components from plain English prompts.", "link": "https://v0.dev/"},
+    {"name": "Open-WebUI", "desc": "Extensible, self-hosted web interface that runs local AI models offline.", "link": "https://openwebui.com/"},
+    {"name": "Ollama", "desc": "Tool to run large language models locally on your computer with a single command.", "link": "https://ollama.com/"},
+    {"name": "Supabase", "desc": "Open source Firebase alternative providing PostgreSQL database and instant APIs.", "link": "https://supabase.com/"}
 ]
 
 item = random.choice(tools)
-raw_info = f"Name: {item['name']}, Info: {item['desc']}, URL: {item['link']}"
+ai_post = generate_post_groq(item["name"], item["desc"], item["link"])
 
-content = generate_post(raw_info)
-if not content:
-    content = f"🔥 {item['name']}\n💡 {item['desc']}\n🔗 Link: {item['link']}"
+if not ai_post:
+    ai_post = f"🔥 {item['name']}\n\n💡 What it does: {item['desc']}\n\n🔗 Link: {item['link']}"
 
-final_post = f"{content}\n\n📌 Follow: @techdrop24_daily"
+final_post = f"{ai_post}\n\n📌 Follow: @techdrop24_daily"
 
 print("Sending post to channel...")
 send_telegram(CHANNEL_ID, final_post)
 print("Sending alert to personal chat...")
-send_telegram(MY_CHAT_ID, f"Test alert: Attempted to post {item['name']}")
+send_telegram(MY_CHAT_ID, f"✅ Groq AI Post Delivered: {item['name']}")
