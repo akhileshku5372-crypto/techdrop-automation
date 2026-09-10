@@ -3,7 +3,7 @@ from groq import Groq
 from fpdf import FPDF
 
 # Groq client init
-client = Groq(api_key="")
+client = Groq(api_key="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")
 
 def generate_content():
     prompt = """
