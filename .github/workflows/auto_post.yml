@@ -2,7 +2,7 @@ name: Auto Post to Telegram
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # Har 4 ghante me auto trigger
+    - cron: '0 */2 * * *'  # Har 2 ghante me auto trigger
   workflow_dispatch:       # Manual test button
 
 jobs:
